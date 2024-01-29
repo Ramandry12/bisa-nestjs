@@ -11,7 +11,8 @@ import { GetProductFilterDto } from './dto/get-products-filter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './products.entity';
 import { Repository } from 'typeorm';
-import { ImageToBase64 } from 'src/tasks/imagebase64';
+import * as fs from 'fs';
+import * as util from 'util';
 
 @Injectable()
 export class ProductService {
@@ -19,6 +20,23 @@ export class ProductService {
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
   ) {}
+
+  private async ImageToBase64(filePath: string): Promise<string> {
+    const readFile = util.promisify(fs.readFile);
+
+    try {
+      // Read the image file asynchronously
+      const imageData = await readFile(filePath);
+
+      // Convert the image data to base64 string
+      const base64String = imageData.toString('base64');
+
+      return base64String;
+    } catch (error) {
+      // Handle any errors that occur during the process
+      throw new Error(`Failed to read image file: ${error.message}`);
+    }
+  }
 
   async getProducts(filterDto: GetProductFilterDto): Promise<Product[]> {
     console.log(filterDto);
@@ -49,7 +67,7 @@ export class ProductService {
   ): Promise<Product> {
     const { idProduct, productName, description, price, category, rating } =
       createProductDto;
-    const base64Image = await ImageToBase64(imageFile.path);
+    const base64Image = await this.ImageToBase64(imageFile.path);
 
     if (idProduct.length > 8) {
       throw new HttpException(
@@ -90,7 +108,7 @@ export class ProductService {
 
     const { idProduct, productName, description, price, category, rating } =
       updateProductDto;
-    const base64Image = await ImageToBase64(imageFile.path);
+    const base64Image = await this.ImageToBase64(imageFile.path);
 
     if (idProduct.length > 8) {
       throw new HttpException(
