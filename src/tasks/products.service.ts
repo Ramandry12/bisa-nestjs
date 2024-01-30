@@ -11,8 +11,8 @@ import { GetProductFilterDto } from './dto/get-products-filter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './products.entity';
 import { Repository } from 'typeorm';
-import * as fs from 'fs';
-import * as util from 'util';
+// import * as fs from 'fs';
+// import * as util from 'util';
 
 @Injectable()
 export class ProductService {
@@ -21,22 +21,22 @@ export class ProductService {
     private productRepository: Repository<Product>,
   ) {}
 
-  private async ImageToBase64(filePath: string): Promise<string> {
-    const readFile = util.promisify(fs.readFile);
+  // private async ImageToBase64(filePath: string): Promise<string> {
+  //   const readFile = util.promisify(fs.readFile);
 
-    try {
-      // Read the image file asynchronously
-      const imageData = await readFile(filePath);
+  //   try {
+  //     // Read the image file asynchronously
+  //     const imageData = await readFile(filePath);
 
-      // Convert the image data to base64 string
-      const base64String = imageData.toString('base64');
+  //     // Convert the image data to base64 string
+  //     const base64String = imageData.toString('base64');
 
-      return base64String;
-    } catch (error) {
-      // Handle any errors that occur during the process
-      throw new Error(`Failed to read image file: ${error.message}`);
-    }
-  }
+  //     return base64String;
+  //   } catch (error) {
+  //     // Handle any errors that occur during the process
+  //     throw new Error(`Failed to read image file: ${error.message}`);
+  //   }
+  // }
 
   async getProducts(filterDto: GetProductFilterDto): Promise<Product[]> {
     console.log(filterDto);
@@ -63,11 +63,11 @@ export class ProductService {
 
   async createProduct(
     createProductDto: CreateProductDto,
-    imageFile: Express.Multer.File,
+    // imageFile: Express.Multer.File,
   ): Promise<Product> {
     const { idProduct, productName, description, price, category, rating } =
       createProductDto;
-    const base64Image = await this.ImageToBase64(imageFile.path);
+    // const base64Image = await this.ImageToBase64(imageFile.path);
 
     if (idProduct.length > 8) {
       throw new HttpException(
@@ -91,7 +91,7 @@ export class ProductService {
       description,
       price,
       category,
-      image: base64Image,
+      // image: base64Image,
       rating,
       status: ProductStatus.TERSEDIA,
     });
@@ -102,13 +102,13 @@ export class ProductService {
   async updateProduct(
     id: string,
     updateProductDto: CreateProductDto,
-    imageFile: Express.Multer.File,
+    // imageFile: Express.Multer.File,
   ): Promise<Product> {
     const existingProduct = await this.getProductById(id);
 
     const { idProduct, productName, description, price, category, rating } =
       updateProductDto;
-    const base64Image = await this.ImageToBase64(imageFile.path);
+    // const base64Image = await this.ImageToBase64(imageFile.path);
 
     if (idProduct.length > 8) {
       throw new HttpException(
@@ -132,7 +132,7 @@ export class ProductService {
     existingProduct.price = price;
     existingProduct.category = category;
     existingProduct.rating = rating;
-    existingProduct.image = base64Image;
+    // existingProduct.image = base64Image;
 
     await this.productRepository.save(existingProduct);
 

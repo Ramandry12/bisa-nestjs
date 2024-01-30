@@ -14,7 +14,7 @@ import { UserModule } from './user/user.module';
       host: 'ep-proud-smoke-a1tb4ww6-pooler.ap-southeast-1.postgres.vercel-storage.com',
       port: 5432,
       username: 'default',
-      password: 'tjCpEwU8l4Yi',
+      password: 'vWD9TjhnV7cA',
       database: 'verceldb',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       autoLoadEntities: true,

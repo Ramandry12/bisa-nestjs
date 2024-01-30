@@ -21,8 +21,8 @@ export class Product {
   @Column()
   category: string;
 
-  @Column()
-  image: string;
+  // @Column()
+  // image: string;
 
   @Column()
   status: ProductStatus;

@@ -4,12 +4,10 @@ import {
   Delete,
   Get,
   Param,
-  ParseFilePipeBuilder,
   Patch,
   Post,
   Put,
   Query,
-  UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductService } from './products.service';
@@ -36,19 +34,19 @@ export class ProductsController {
   @Post()
   @UseInterceptors(FileInterceptor('image'))
   createProduct(
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'jpeg',
-        })
-        .build(),
-    )
-    imageFile: Express.Multer.File,
+    // @UploadedFile(
+    //   new ParseFilePipeBuilder()
+    //     .addFileTypeValidator({
+    //       fileType: 'jpeg',
+    //     })
+    //     .build(),
+    // )
+    // imageFile: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
   ) {
     const createdProduct = this.productServise.createProduct(
       createProductDto,
-      imageFile,
+      // imageFile,
     );
     return createdProduct;
   }
@@ -58,12 +56,12 @@ export class ProductsController {
   async updateProduct(
     @Param('id') productId: string,
     @Body() updateProductDto: CreateProductDto,
-    @UploadedFile() imageFile: Express.Multer.File,
+    // @UploadedFile() imageFile: Express.Multer.File,
   ): Promise<Product> {
     return this.productServise.updateProduct(
       productId,
       updateProductDto,
-      imageFile,
+      // imageFile,
     );
   }
 
