@@ -19,20 +19,22 @@ import { Product } from './products.entity';
 
 @Controller('/api/product')
 export class ProductsController {
-  constructor(private productServise: ProductService) {}
+  constructor(private productService: ProductService) {}
 
   @Get()
-  getProducts(@Query() filterDto: GetProductFilterDto): Promise<Product[]> {
-    return this.productServise.getProducts(filterDto);
+  async getProducts(
+    @Query() filterDto: GetProductFilterDto,
+  ): Promise<Product[]> {
+    return this.productService.getProducts(filterDto);
   }
 
   @Get('/:id')
   getProductById(@Param('id') id: string): Promise<Product> {
-    return this.productServise.getProductById(id);
+    return this.productService.getProductById(id);
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('image'))
+  // @UseInterceptors(FileInterceptor('image'))
   createProduct(
     // @UploadedFile(
     //   new ParseFilePipeBuilder()
@@ -44,7 +46,7 @@ export class ProductsController {
     // imageFile: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
   ) {
-    const createdProduct = this.productServise.createProduct(
+    const createdProduct = this.productService.createProduct(
       createProductDto,
       // imageFile,
     );
@@ -58,7 +60,7 @@ export class ProductsController {
     @Body() updateProductDto: CreateProductDto,
     // @UploadedFile() imageFile: Express.Multer.File,
   ): Promise<Product> {
-    return this.productServise.updateProduct(
+    return this.productService.updateProduct(
       productId,
       updateProductDto,
       // imageFile,
@@ -67,7 +69,7 @@ export class ProductsController {
 
   @Delete('/:id')
   deleteProduct(@Param('id') id: string): Promise<void> {
-    return this.productServise.deleteProduct(id);
+    return this.productService.deleteProduct(id);
   }
 
   @Patch('/:id/status')
@@ -77,6 +79,6 @@ export class ProductsController {
   ): Promise<Product> {
     const { status } = updateProductStatusDto;
     console.log(status);
-    return this.productServise.updateProductStatus(id, status);
+    return this.productService.updateProductStatus(id, status);
   }
 }

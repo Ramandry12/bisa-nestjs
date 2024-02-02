@@ -1,8 +1,15 @@
-import { IsJSON, IsNotEmpty, IsNumberString, IsString } from 'class-validator';
+import {
+  IsJSON,
+  IsNotEmpty,
+  IsNumberString,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateProductDto {
   @IsNotEmpty()
   @IsString()
+  @MaxLength(8)
   idProduct: string;
 
   @IsNotEmpty()
@@ -27,5 +34,5 @@ export class CreateProductDto {
     count: number;
   };
 
-  image: string;
+  // image: string;
 }

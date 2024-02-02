@@ -3,7 +3,9 @@ import { ProductsModule } from './tasks/products.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { multerConfig } from './middleware/multer.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './user/user.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { SuccessInterceptor } from './helper/succes.intercepter';
+import { UserAuthModule } from './user-auth/user-auth.module';
 
 @Module({
   imports: [
@@ -23,7 +25,13 @@ import { UserModule } from './user/user.module';
         rejectUnauthorized: true,
       },
     }),
-    UserModule,
+    UserAuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SuccessInterceptor,
+    },
   ],
 })
 export class AppModule {}

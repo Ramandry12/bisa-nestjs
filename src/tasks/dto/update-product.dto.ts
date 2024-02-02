@@ -38,7 +38,7 @@ export class UpdateProductDto {
     count: number;
   };
 
-  @IsOptional()
-  @IsString()
-  image?: string;
+  // @IsOptional()
+  // @IsString()
+  // image?: string;
 }

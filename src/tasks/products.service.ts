@@ -1,9 +1,10 @@
 import {
+  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
-  UnprocessableEntityException,
 } from '@nestjs/common';
 import { ProductStatus } from './product-status.enum';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -39,21 +40,35 @@ export class ProductService {
   // }
 
   async getProducts(filterDto: GetProductFilterDto): Promise<Product[]> {
-    console.log(filterDto);
     const query = this.productRepository.createQueryBuilder('product');
+    const { status, search } = filterDto;
+
+    if (status) {
+      query.andWhere('product.status = :status', { status });
+    } else if (search) {
+      query.andWhere(
+        'LOWER(product.idProduct) LIKE LOWER(:search) OR LOWER(product.productName) LIKE LOWER(:search) OR LOWER(product.description) LIKE LOWER(:search)',
+        { search: `%${search}%` },
+      );
+    }
 
     const product = await query.getMany();
+
+    if (!product.length) {
+      throw new NotFoundException('No products found');
+    }
     const rating = product.map((value) => {
-      value.rating = JSON.parse(value.rating as unknown as string);
+      value.rating =
+        typeof value.rating === 'string'
+          ? JSON.parse(value.rating)
+          : value.rating;
+
       return value;
     });
     return rating;
   }
 
   async getProductById(id: string): Promise<Product> {
-    if (id.length !== 36) {
-      throw new UnprocessableEntityException(`Invalid UUID : ${id}`);
-    }
     const found = await this.productRepository.findOne({ where: { id } });
     if (!found) {
       throw new NotFoundException(`Task with ID "${id}" not found`);
@@ -69,21 +84,15 @@ export class ProductService {
       createProductDto;
     // const base64Image = await this.ImageToBase64(imageFile.path);
 
-    if (idProduct.length > 8) {
-      throw new HttpException(
-        'idProduct should have a maximum length of 8 characters',
-        HttpStatus.PAYLOAD_TOO_LARGE,
-      );
-    }
+    // const productWithSameId = await this.productRepository.findOne({
+    //   where: { idProduct },
+    // });
 
-    const productWithSameId = await this.productRepository.findOne({
-      where: { idProduct },
-    });
-    if (productWithSameId) {
-      throw new UnprocessableEntityException(
-        `Product with idProduct "${idProduct}" already exists`,
-      );
-    }
+    // if (productWithSameId) {
+    //   throw new UnprocessableEntityException(
+    //     `Product with idProduct "${idProduct}" already exists`,
+    //   );
+    // }
 
     const product: Product = this.productRepository.create({
       idProduct,
@@ -95,7 +104,18 @@ export class ProductService {
       rating,
       status: ProductStatus.TERSEDIA,
     });
-    await this.productRepository.save(product);
+
+    try {
+      await this.productRepository.save(product);
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException(
+          `Product with idProduct ${idProduct} already exists`,
+        );
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
     return product;
   }
 
@@ -117,14 +137,14 @@ export class ProductService {
       );
     }
 
-    const productWithSameId = await this.productRepository.findOne({
-      where: { idProduct },
-    });
-    if (productWithSameId) {
-      throw new UnprocessableEntityException(
-        `Product with idProduct "${idProduct}" already exists`,
-      );
-    }
+    // const productWithSameId = await this.productRepository.findOne({
+    //   where: { idProduct },
+    // });
+    // if (productWithSameId) {
+    //   throw new UnprocessableEntityException(
+    //     `Product with idProduct "${idProduct}" already exists`,
+    //   );
+    // }
 
     existingProduct.idProduct = idProduct;
     existingProduct.productName = productName;
@@ -134,7 +154,19 @@ export class ProductService {
     existingProduct.rating = rating;
     // existingProduct.image = base64Image;
 
-    await this.productRepository.save(existingProduct);
+    // await this.productRepository.save(existingProduct);
+
+    try {
+      await this.productRepository.save(existingProduct);
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException(
+          `Product with idProduct ${idProduct} already exists`,
+        );
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
 
     return existingProduct;
   }
